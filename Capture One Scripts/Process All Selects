@@ -1,0 +1,102 @@
+## Settings
+
+-- Change name in quotes to the name of an existing Process Recipe if desired
+-- Default Recipe name is ProcessAllSelects
+-- If the default is selected, it will always clear the settings and reset them to the scripted ones below
+
+
+set SelectsProcess to "ProcessAllSelects"
+
+-- Settings for Star Ratings (Process Recipe is in "")
+set SelectsProcess1 to "ProcessAllSelects"
+set SelectsProcess2 to "ProcessAllSelects"
+set SelectsProcess3 to "ProcessAllSelects"
+set SelectsProcess4 to "ProcessAllSelects"
+set SelectsProcess5 to "ProcessAllSelects"
+
+-- Settings for Color Filters (Process Recipe is in "") 
+set SelectsProcessRed to "red"
+set SelectsProcessOrange to "orange"
+set SelectsProcessYellow to "yellow"
+set SelectsProcessGreen to "green"
+set SelectsProcessBlue to "blue"
+set SelectsProcessPink to "pink"
+set SelectsProcessPurple to "purple"
+
+-- Change location of output - Choose true for Output and false for Selects
+set processToSessionOutput to true
+
+
+
+
+-- Script Below
+-- Do Not Modify
+
+
+
+set theRules to "<?xml version=\"1.0\" encoding=\"UTF-8\"?><MatchOperator Kind=\"AND\"></MatchOperator>"
+set theName to "All Images"
+
+tell application "Capture One"
+	set sessionDoc to document 1
+	-- check if collection with name "All Images" exists
+	set collectionExists to (count of (every collection of sessionDoc whose name is "All Images")) is equal to 1
+	
+	if not collectionExists then
+		-- create new collection with name "All Images"
+		tell front document of application "Capture One"
+			make new collection with properties {name:theName, kind:smart album, rules:theRules}
+		end tell
+	end if
+end tell
+
+
+tell application "Capture One"
+	tell front document of application "Capture One"
+		if processToSessionOutput is true then
+			set destFolder to output
+		else
+			set destFolder to selects
+			
+		end if
+	end tell
+	
+	tell current document
+		if SelectsProcess is equal to "ProcessAllSelects" then
+			-- Check if the Recipe exists and delete it if it does, this will make sure it always has the correct settings
+			if exists recipe "ProcessAllSelects" then
+				delete recipe "ProcessAllSelects"
+			end if
+			
+			-- Re-Make the recipe
+			if not (exists recipe "ProcessAllSelects") then
+				make new recipe with properties {name:"ProcessAllSelects", enabled:true, output format:JPEG_QuickProof, output sub folder:"[Session Sub Path]", root folder type:custom location, root folder location:destFolder, export crop method:ignore, sharpening:no output sharpening, include ratings:true}
+			end if
+		end if
+	end tell
+end tell
+
+
+tell application "Capture One"
+	tell current document
+		tell collection named "All Images"
+			
+			-- Process all starred images
+			process (variants whose rating is 1) recipe SelectsProcess1
+			process (variants whose rating is 2) recipe SelectsProcess2
+			process (variants whose rating is 3) recipe SelectsProcess3
+			process (variants whose rating is 4) recipe SelectsProcess4
+			process (variants whose rating is 5) recipe SelectsProcess5
+			
+			-- Process all color tagged images			
+			process (variants whose color tag is 1) recipe SelectsProcessRed -- Red
+			process (variants whose color tag is 2) recipe SelectsProcessOrange -- Orange
+			process (variants whose color tag is 3) recipe SelectsProcessYellow -- Yellow
+			process (variants whose color tag is 4) recipe SelectsProcessGreen -- Green
+			process (variants whose color tag is 5) recipe SelectsProcessBlue -- Blue
+			process (variants whose color tag is 6) recipe SelectsProcessPink -- Pink
+			process (variants whose color tag is 7) recipe SelectsProcessPurple -- Purple
+			
+		end tell
+	end tell
+end tell
