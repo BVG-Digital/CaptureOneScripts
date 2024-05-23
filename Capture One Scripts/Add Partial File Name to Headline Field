@@ -1,0 +1,14 @@
+tell application "Capture One"
+	-- Loop through each selected variant
+	repeat with thisVariant in (get selected variants)
+		-- Get the file name of the variant
+		set fileName to name of thisVariant
+		
+		-- Extract the first part of the file name up to the first instance of '_'
+		set AppleScript's text item delimiters to "_"
+		set headlineText to item 1 of (text items of fileName)
+		
+		-- Set the content headline metadata field
+		set content headline of thisVariant to headlineText
+	end repeat
+end tell
